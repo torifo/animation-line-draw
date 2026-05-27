@@ -1,0 +1,166 @@
+/* ────────────────────────────────────────────
+   A·Sc · Line Draw (scroll-synced SVG stroke)
+   スクロール進捗に同期して SVG ストロークを描画
+   Pure CSS + JS、外部依存ゼロ
+   ──────────────────────────────────────────── */
+
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:where(html,body){line-break:strict;word-break:normal;overflow-wrap:break-word}
+:where(h1,h2,h3,h4){text-wrap:balance}
+:where(p,li){text-wrap:pretty}
+
+:root{
+  --bg:#f4f3ee;
+  --ink:#0a0a0a;
+  --muted:#6a6a6a;
+  --line:#d8d6cc;
+  --paper:#fff;
+  --hi:#ff2d55;
+  --alt:#0066ff;
+  --font:'DM Sans','Noto Sans JP',sans-serif;
+  --mono:'JetBrains Mono',monospace;
+
+  /* ── Component variables ── */
+  --ld-stroke:#0a0a0a;
+  --ld-accent:#ff2d55;
+  --ld-width:2;
+  --ld-scroll:260vh;       /* 描画に使うスクロール区間 */
+}
+
+html{scroll-behavior:smooth}
+body{
+  background:var(--bg);color:var(--ink);
+  font-family:var(--font);font-weight:400;line-height:1.65;
+}
+a{color:inherit;text-decoration:none}
+
+/* ─── HEADER ─── */
+header.site{
+  position:sticky;top:0;z-index:50;background:var(--bg);
+  padding:1rem clamp(1.2rem,4vw,3rem);
+  display:flex;align-items:center;justify-content:space-between;gap:1rem;
+  border-bottom:1px solid var(--ink);
+}
+.back{font-family:var(--mono);font-size:.78rem;letter-spacing:.18em;display:inline-flex;align-items:center;gap:.6em}
+.back .arrow{transition:transform .25s}
+.back:hover .arrow{transform:translateX(-.3em)}
+.cell-marker{font-family:var(--mono);font-size:.78rem;letter-spacing:.22em;color:var(--hi)}
+
+/* ─── intro / after ─── */
+.intro,.after{
+  max-width:1000px;margin:0 auto;
+  padding:clamp(4rem,10vw,8rem) clamp(1.5rem,4vw,3rem);
+  min-height:60vh;display:flex;flex-direction:column;justify-content:center;
+}
+.kicker{
+  display:inline-block;align-self:flex-start;
+  font-family:var(--mono);font-size:.78rem;letter-spacing:.25em;
+  padding:.3em .9em;border:1px solid var(--ink);margin-bottom:1.5rem;
+}
+.intro h1{font-weight:700;font-size:clamp(2.4rem,8vw,5.4rem);line-height:1.02;letter-spacing:-.02em}
+.intro .lead{font-size:clamp(1rem,1.3vw,1.1rem);color:var(--muted);max-width:38em;margin-top:1.5rem}
+/* intro 上部の図形ピッカー */
+.ld-pick-wrap{
+  align-self:flex-start;
+  display:flex;flex-direction:column;gap:.7rem;
+  margin-top:2rem;
+}
+.ld-pick-label{
+  font-family:var(--mono);font-size:.68rem;letter-spacing:.25em;color:var(--muted);
+}
+.scroll-cue{
+  margin-top:2rem;font-family:var(--mono);font-size:.74rem;letter-spacing:.25em;color:var(--muted);
+  animation:cue 1.8s cubic-bezier(.5,0,.5,1) infinite;
+}
+@keyframes cue{0%,100%{opacity:1;transform:translateY(0)}50%{opacity:.4;transform:translateY(.3em)}}
+.after h2{font-weight:700;font-size:clamp(1.8rem,5vw,3rem);line-height:1.1;letter-spacing:-.01em}
+.after p{font-size:clamp(.95rem,1.3vw,1.1rem);color:var(--muted);max-width:36em;margin-top:1.2rem}
+.after code,.note code,.var span code{font-family:var(--mono);font-size:.88em;background:var(--paper);padding:.1em .35em;border:1px solid var(--line)}
+
+/* ────────────────────────────────────────────
+   COMPONENT: .line-draw
+   ──────────────────────────────────────────── */
+.line-draw{
+  position:relative;
+  height:var(--ld-scroll);
+}
+.ld-sticky{
+  position:sticky;top:0;
+  height:100vh;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:1.4rem;
+}
+.ld-svg{
+  width:min(78vmin,560px);height:auto;
+  overflow:visible;
+}
+.ld-path{
+  fill:none;
+  stroke:var(--ld-stroke);
+  stroke-width:var(--ld-width);
+  stroke-linecap:round;
+  stroke-linejoin:round;
+  /* dasharray / dashoffset は JS が設定 */
+}
+.ld-path.ld-accent{ stroke:var(--ld-accent); stroke-width:calc(var(--ld-width) + 1); }
+
+.ld-bar{
+  width:min(78vmin,560px);height:3px;background:var(--line);position:relative;
+}
+.ld-bar-fill{
+  position:absolute;left:0;top:0;height:100%;width:var(--ld-progress,0%);
+  background:var(--hi);
+}
+.ld-pct{font-family:var(--mono);font-size:.74rem;letter-spacing:.2em;color:var(--muted)}
+
+/* 図形ピッカー */
+.ld-picker{
+  display:flex;flex-wrap:wrap;gap:.4rem;
+  max-width:min(90vw,620px);
+}
+.ld-chip{
+  font-family:var(--mono);font-size:.72rem;letter-spacing:.08em;
+  padding:.4em .9em;background:var(--paper);border:1px solid var(--ink);color:var(--ink);
+  cursor:pointer;transition:background .15s,color .15s,transform .15s;
+}
+.ld-chip:hover{transform:translate(-1px,-1px)}
+.ld-chip[aria-pressed="true"]{background:var(--hi);color:#fff;border-color:var(--hi)}
+/* END COMPONENT */
+
+
+/* ─── NOTES ─── */
+section.notes{max-width:1000px;margin:0 auto;padding:clamp(3rem,5vw,4.5rem) clamp(1.5rem,4vw,3rem)}
+.shou{
+  display:flex;align-items:baseline;justify-content:space-between;gap:1rem;flex-wrap:wrap;
+  padding-bottom:1rem;border-bottom:1px solid var(--ink);margin-bottom:2.5rem;
+}
+.shou h2{font-size:clamp(1.3rem,2vw,1.7rem);font-weight:700;letter-spacing:.04em}
+.shou .no{font-family:var(--mono);font-size:.78rem;letter-spacing:.25em;color:var(--muted)}
+.notes-grid{display:grid;grid-template-columns:1fr;gap:1.2rem;margin-bottom:3rem}
+@media(min-width:780px){.notes-grid{grid-template-columns:repeat(3,1fr)}}
+.note{position:relative;background:var(--paper);border:1px solid var(--ink);padding:1.5rem 1.4rem 1.4rem}
+.note-no{position:absolute;top:1rem;right:1rem;font-family:var(--mono);font-size:.7rem;letter-spacing:.2em;color:var(--muted)}
+.note h3{font-size:1.02rem;font-weight:700;margin-bottom:.7rem;letter-spacing:.02em}
+.note p{font-size:.86rem;color:var(--muted);line-height:1.8}
+.sub-h{font-size:1rem;font-weight:700;letter-spacing:.04em;margin:2rem 0 1rem;padding-bottom:.7rem;border-bottom:1px dashed var(--ink)}
+.vars{display:grid;grid-template-columns:1fr;gap:0;border:1px solid var(--ink);background:var(--paper)}
+.var{display:grid;grid-template-columns:minmax(8rem,auto) 1fr auto;gap:1rem;padding:.8rem 1rem;border-bottom:1px solid var(--line);align-items:center}
+.var:last-child{border-bottom:none}
+.var code{font-family:var(--mono);font-size:.82rem;color:var(--hi);font-weight:500}
+.var span{font-size:.85rem;color:var(--muted);line-height:1.5}
+.var em{font-family:var(--mono);font-size:.78rem;font-style:normal;color:var(--ink);background:var(--bg);padding:.15em .55em;border:1px solid var(--line);white-space:nowrap}
+@media(max-width:680px){.var{grid-template-columns:1fr;gap:.3rem;padding:.9rem 1rem}.var em{justify-self:start}}
+
+/* ─── FOOTER ─── */
+footer{
+  padding:2rem clamp(1.2rem,4vw,3rem) 1.5rem;
+  display:flex;flex-wrap:wrap;gap:1rem;justify-content:space-between;align-items:center;
+  font-family:var(--mono);font-size:.72rem;letter-spacing:.2em;color:var(--muted);
+  border-top:1px solid var(--ink);
+}
+footer a{color:var(--ink)}
+
+/* Reduced motion: 全線を描画済みで静止表示（JS も尊重） */
+@media (prefers-reduced-motion: reduce){
+  .scroll-cue{animation:none}
+}

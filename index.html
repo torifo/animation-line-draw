@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ライン描画スクロール — Animation Studies</title>
+  <meta name="description" content="スクロール進捗に同期して SVG ストロークが順に描かれる演出。Apple 製品ページ / Codrops 風。" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=JetBrains+Mono:wght@400;500;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+
+<header class="site">
+  <a class="back" href="../">
+    <span class="arrow">←</span>
+    <span>ANIMATION · INDEX</span>
+  </a>
+  <span class="cell-marker">LINE DRAW</span>
+</header>
+
+<main>
+
+  <!-- ─── intro ─── -->
+  <section class="intro">
+    <span class="kicker">DESIGN STUDY · ANIMATION</span>
+    <h1>スクロールで<br>線が描かれる。</h1>
+    <p class="lead">まず描く図形を選んでから下へスクロール。進捗に同期して SVG のストロークが順に引かれ、上へ戻すと逆再生で消える。進捗＝スクロール位置なので、途中で止めれば描きかけのまま留まる。</p>
+    <div class="ld-pick-wrap">
+      <span class="ld-pick-label">SHAPE — 図形を選ぶ</span>
+      <div class="ld-picker" data-ld-picker aria-label="図形を選択"></div>
+    </div>
+    <span class="scroll-cue">SCROLL ↓</span>
+  </section>
+
+  <!-- ─── The Reusable Component ─── -->
+  <section class="line-draw" data-line-draw>
+    <div class="ld-sticky">
+      <svg class="ld-svg" viewBox="0 0 800 600" preserveAspectRatio="xMidYMid meet" aria-hidden="true"></svg>
+      <div class="ld-bar"><span class="ld-bar-fill"></span></div>
+      <span class="ld-pct" data-ld-pct>0%</span>
+    </div>
+  </section>
+
+  <!-- ─── after ─── -->
+  <section class="after">
+    <h2>線が引き終わった。</h2>
+    <p>SVG の各要素の全長を <code>getTotalLength()</code> で測り、<code>stroke-dashoffset</code> をスクロール進捗で 0 まで詰めるだけ。要素を並べた順に区間を割り当てて、順番に描かれる。</p>
+  </section>
+
+  <!-- ─── Usage notes ─── -->
+  <section class="notes">
+    <div class="shou">
+      <h2>使い方</h2>
+      <span class="no">— USAGE</span>
+    </div>
+
+    <div class="notes-grid">
+      <div class="note">
+        <span class="note-no">01</span>
+        <h3>2 ファイルをコピー</h3>
+        <p>本ディレクトリの <code>style.css</code> と <code>script.js</code> を移植先にコピー。外部依存ゼロ。</p>
+      </div>
+      <div class="note">
+        <span class="note-no">02</span>
+        <h3>マークアップ</h3>
+        <p>背の高い <code>.line-draw[data-line-draw]</code> の中に <code>.ld-sticky</code>（sticky）と <code>&lt;svg&gt;</code> を置き、描きたい線に <code>class="ld-path"</code> を付ける（<code>path</code> でも <code>circle</code> でも可）。</p>
+      </div>
+      <div class="note">
+        <span class="note-no">03</span>
+        <h3>図形を切り替え</h3>
+        <p><code>script.js</code> の <code>SHAPES</code> に図形を登録すると、ピッカーが自動生成される。多角形・スパイラルは <code>polygon()</code> / <code>spiral()</code> ヘルパーでパラメトリック生成。切り替えると現在のスクロール進捗で再描画される。</p>
+      </div>
+    </div>
+
+    <h3 class="sub-h">カスタマイズ可能な CSS 変数</h3>
+    <div class="vars">
+      <div class="var"><code>--ld-stroke</code><span>線の色</span><em>#0a0a0a</em></div>
+      <div class="var"><code>--ld-accent</code><span><code>.ld-accent</code> を付けた線の色</span><em>#ff2d55</em></div>
+      <div class="var"><code>--ld-width</code><span>線の太さ</span><em>2</em></div>
+      <div class="var"><code>--ld-scroll</code><span>描画に使うスクロール区間（セクション高さ）</span><em>260vh</em></div>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <span>© 2026 ANIMATION DESIGN STUDY</span>
+  <a href="../">← INDEX</a>
+</footer>
+
+<script src="./script.js"></script>
+</body>
+</html>
