@@ -14,6 +14,23 @@
 | 依存 | なし（Pure HTML + CSS + Vanilla JS） |
 | 推奨配置 | プロダクト紹介、ステップ解説、図解の段階的提示 |
 
+
+## スキルとして導入 / Install as a skill
+
+このリポジトリは Claude Code / Codex CLI 共通の **`SKILL.md`**（オープン標準）を同梱しており、AI エージェントのスキルとして使えます。リポジトリ自体をスキルディレクトリへリンクするだけです。
+
+This repo ships a cross-agent **`SKILL.md`** (open standard) usable by both Claude Code and Codex CLI. Just link the repo into the agent's skills directory.
+
+```bash
+# Claude Code
+ln -s "$(pwd)" ~/.claude/skills/anim-line-draw
+# Codex CLI
+ln -s "$(pwd)" ~/.codex/skills/anim-line-draw
+```
+
+エージェントを再起動すると `description` に基づき自動でマッチします（スキル名: `anim-line-draw`）。
+Restart the agent; it is matched automatically by the skill's `description` (skill name: `anim-line-draw`).
+
 ## 仕組み（位置ベース）
 
 1. 各 `.ld-path` の全長を `getTotalLength()` で測り、`stroke-dasharray = 全長`、`stroke-dashoffset = 全長`（＝未描画）にする
